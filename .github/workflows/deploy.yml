@@ -1,0 +1,39 @@
+name: CI/CD Backend Despachos EKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Login a Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build y Push imagen a ECR
+        run: |
+          docker build -t backend-despachos-innovatech ./Springboot-API-REST
+          docker tag backend-despachos-innovatech:latest 830985015694.dkr.ecr.us-east-1.amazonaws.com/backend-despachos-innovatech:latest
+          docker push 830985015694.dkr.ecr.us-east-1.amazonaws.com/backend-despachos-innovatech:latest
+
+      - name: Configurar kubectl
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name innovatech-eks
+
+      - name: Deploy en EKS
+        run: |
+          kubectl rollout restart deployment/backend-despachos -n innovatech
+          kubectl rollout status deployment/backend-despachos -n innovatech
