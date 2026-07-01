@@ -25,7 +25,7 @@ jobs:
 
       - name: Build y Push imagen a ECR
         run: |
-          docker build -t backend-despachos-innovatech ./Springboot-API-REST
+          docker build -t backend-despachos-innovatech ./Springboot-API-REST-DESPACHO
           docker tag backend-despachos-innovatech:latest 830985015694.dkr.ecr.us-east-1.amazonaws.com/backend-despachos-innovatech:latest
           docker push 830985015694.dkr.ecr.us-east-1.amazonaws.com/backend-despachos-innovatech:latest
 
